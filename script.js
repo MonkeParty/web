@@ -90,27 +90,27 @@ function initializeAuth() {
     const token = localStorage.getItem('jwt-token');
     if (token) {
         const user = parseJwt(token);
-        updateAuthUI(user.name);
+        updateAuthUI(user);
     }
 }
 
-// Update UI to show user's name or login/register buttons
-function updateAuthUI(userName = null) {
+// Update UI to show user's name, subscription status, or login/register buttons
+function updateAuthUI(user = null) {
     const authButtons = document.querySelector('.auth-buttons');
-    if (userName) {
+    if (user) {
         authButtons.innerHTML = `
-            <span>Welcome, ${userName}!</span>
-            <button class="subscribe-btn" onclick="showModal('subscriptionModal')">Buy Subscription</button>
-            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            <span>Добро пожаловать, ${user.name}!</span>
+            ${user.has_sub ? '<span>У вас есть подписка</span>' : '<button class="subscribe-btn" onclick="showModal(\'subscriptionModal\')">Купить подписку</button>'}
+            ${user.is_admin ? '<button class="admin-panel-btn" onclick="openAdminPanel()">Панель Администратора</button>' : ''}
+            <button class="logout-btn" onclick="handleLogout()">Выйти</button>
         `;
     } else {
         authButtons.innerHTML = `
-            <button class="login-btn" onclick="showModal('loginModal')">Login</button>
-            <button class="register-btn" onclick="showModal('registerModal')">Register</button>
+            <button class="login-btn" onclick="showModal('loginModal')">Войти</button>
+            <button class="register-btn" onclick="showModal('registerModal')">Регистрация</button>
         `;
     }
 }
-
 
 // Handle login
 async function handleLogin(event) {
@@ -126,46 +126,48 @@ async function handleLogin(event) {
             body: JSON.stringify({ email, password })
         });
 
-        if (!response.ok) throw new Error('Login failed');
+        if (!response.ok) throw new Error('Ошибка входа');
 
         const data = await response.json();
         localStorage.setItem('jwt-token', data.token);
         const user = parseJwt(data.token);
-        updateAuthUI(user.name);
+        updateAuthUI(user);
         hideModal('loginModal');
     } catch (error) {
         console.error(error);
-        alert('Failed to login. Please check your credentials.');
+        alert('Не удалось войти. Проверьте свои данные.');
     }
 }
 
-// Handle registration
+// Handle register
 async function handleRegister(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
     const name = formData.get('name');
+    const lastname = formData.get('lastname');
+    const fathername = formData.get('fathername');
     const email = formData.get('email');
     const password = formData.get('password');
+    const birthday = formData.get('birthday');
 
     try {
         const response = await fetch('http://localhost:8081/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            // TODO: fname, lname, fathername, birthday
-            body: JSON.stringify({ name, email, password })
+            body: JSON.stringify({ name, lastname, fathername, email, password, birthday })
         });
 
-        if (!response.ok) throw new Error('Registration failed');
+        if (!response.ok) throw new Error('Ошибка регистрации');
 
         const data = await response.json();
         localStorage.setItem('jwt-token', data.token);
         const user = parseJwt(data.token);
-        updateAuthUI(user.name);
-        alert(user.name)
+        updateAuthUI(user);
+        alert('Добро пожаловать, ' + user.name + '!');
         hideModal('registerModal');
     } catch (error) {
         console.error(error);
-        alert('Failed to register. Please try again.');
+        alert('Не удалось зарегистрироваться. Попробуйте снова.');
     }
 }
 
@@ -181,7 +183,7 @@ async function handleSubscription() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Authorization': 'Bearer ${token}'
             }
         });
 
@@ -196,6 +198,21 @@ async function handleSubscription() {
     }
 }
 
+
+// Handle logout
+function handleLogout() {
+    localStorage.removeItem('jwt-token');
+    updateAuthUI();
+}
+
+// Initialize authentication state on page load
+document.addEventListener('DOMContentLoaded', initializeAuth);
+
+// Open Admin Panel
+function openAdminPanel() {
+    alert('Переход в панель администратора...');
+    // Здесь можно реализовать редирект или открыть модальное окно
+}
 
 // Handle logout
 function handleLogout() {
