@@ -100,7 +100,8 @@ function updateAuthUI(userName = null) {
     if (userName) {
         authButtons.innerHTML = `
             <span>Welcome, ${userName}!</span>
-            <button class="login-btn" onclick="handleLogout()">Logout</button>
+            <button class="subscribe-btn" onclick="showModal('subscriptionModal')">Buy Subscription</button>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
         `;
     } else {
         authButtons.innerHTML = `
@@ -109,6 +110,7 @@ function updateAuthUI(userName = null) {
         `;
     }
 }
+
 
 // Handle login
 async function handleLogin(event) {
@@ -149,6 +151,7 @@ async function handleRegister(event) {
         const response = await fetch('http://localhost:8081/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            // TODO: fname, lname, fathername, birthday
             body: JSON.stringify({ name, email, password })
         });
 
@@ -158,12 +161,41 @@ async function handleRegister(event) {
         localStorage.setItem('jwt-token', data.token);
         const user = parseJwt(data.token);
         updateAuthUI(user.name);
+        alert(user.name)
         hideModal('registerModal');
     } catch (error) {
         console.error(error);
         alert('Failed to register. Please try again.');
     }
 }
+
+async function handleSubscription() {
+    const token = localStorage.getItem('jwt-token');
+    if (!token) {
+        alert('You need to be logged in to purchase a subscription.');
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:8081/sub', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) throw new Error('Subscription failed');
+
+        const data = await response.json();
+        alert('Subscription purchased successfully!');
+        hideModal('subscriptionModal');
+    } catch (error) {
+        console.error(error);
+        alert('Failed to subscribe. Please try again.');
+    }
+}
+
 
 // Handle logout
 function handleLogout() {
