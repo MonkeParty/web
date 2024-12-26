@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base href="." />
+    <title>Movie Detail</title>
+    <link rel="stylesheet" type="text/css" href="../style.css">
+    <link href="https://vjs.zencdn.net/8.16.1/video-js.css" rel="stylesheet" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://vjs.zencdn.net/8.16.1/video.min.js"></script>
+    <link href="https://unpkg.com/@silvermine/videojs-quality-selector/dist/css/quality-selector.css" rel="stylesheet">
+    <script src="https://unpkg.com/@silvermine/videojs-quality-selector/dist/js/silvermine-videojs-quality-selector.min.js"></script>
+    <script src="script.js" defer></script> <!-- Добавлено defer для загрузки после парсинга HTML -->
+</head>
+<body>
+    <div class="header">
+        <h1>Movie Portal</h1>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search for movies..." onkeyup="searchMovies()">
+        </div>
+        <div class="auth-buttons">
+            <button class="login-btn" onclick="showModal('loginModal')">Login</button>
+            <button class="register-btn" onclick="showModal('registerModal')">Register</button>
+        </div>
+    </div>
+
+    <!-- Модальные окна остаются без изменений -->
+
+    <div id="movieDetail" class="movie-section">
+        <!-- Детали фильма будут загружены сюда -->
+    </div>
+
+    <div id="moviePlayer" class="movie-section">
+        <!-- Детали фильма будут загружены сюда -->
+    </div>
+
+    <div class="comments-section">
+        <h2>Комментарии</h2>
+        <div id="commentsContainer">
+            <!-- Комментарии будут загружены сюда -->
+        </div>
+        <form class="comment-form" onsubmit="handleComment(event)">
+            <label>Ваш ник:</label>
+            <input type="text" id="commentNickname" required>
+            <label>Комментарий:</label>
+            <input type="text" id="commentContent" required>
+            <button type="submit">Оставить комментарий</button>
+        </form>
+    </div>
+    <script>
+        async function loadMovieDetail() {
+            const urlParams = new URLSearchParams(location.search);
+            console.log(new URLSearchParams(window.location.search));
+            const movieId = urlParams.get('movie_id');
+
+            if (!movieId) {
+                alert('Фильм не выбран');
+                return;
+            }
+
+            const response = await fetch(`http://localhost:8081/movies/${movieId}`);
+            const movie = await response.json();
+
+            const movieDetail = document.getElementById('movieDetail');
+            movieDetail.innerHTML = `
+                <div class="movie-section">
+                    <div class="movie-img-container">
+                        <img class="movie-img" src="http://localhost:8081${movie.poster}" alt="${movie.title} Poster">
+                        <div class="rating-text">
+                            <label>Рейтинг фильма:</label>
+                        </div>
+                        <div class="rating-box">${movie.rating}</div>
+                    </div>
+                    <div class="movie-details">
+                        <h1 class="movie-title">${movie.title}</h1>
+                        <p><strong>Описание:</strong> ${movie.description || 'Описание отсутствует.'}</p>
+                        <p><strong>Режиссёр:</strong> ${movie.director}</p>
+                        <p><strong>Актёры:</strong> ${movie.actors.join(', ')}</p>
+                        <p><strong>Страна:</strong> ${movie.country}</p>
+                        <p><strong>Теги:</strong> ${movie.tags.join(', ')}</p>
+                        <p><strong>Год:</strong> ${movie.year}</p>
+                        <p><strong>Продолжительность:</strong> ${movie.duration}</p>
+                        <p><strong>Качество:</strong> ${movie.quality}</p>
+                    </div>
+                </div>`;
+            const moviePlayer = document.getElementById('moviePlayer');
+            moviePlayer.innerHTML = `
+            <div id="videoModal">
+                <div class="video-player">
+                    <video
+                        id="my-video"
+                        class="video-js vjs-default-skin"
+                        controls
+                        preload="auto"
+                        width="1280"
+                        height="528"
+                        poster="http://localhost:8081${movie.poster}"
+                        data-setup='{}'
+                    >
+                        <source src="http://localhost:8081${movie.movie_file}" type="video/mp4" />
+                        <p class="vjs-no-js">
+                            To view this video please enable JavaScript, and consider upgrading to a
+                            web browser that
+                            <a href="https://videojs.com/html5-video-support/" target="_blank">
+                                supports HTML5 video
+                            </a>
+                        </p>
+                    </video>
+                </div>
+            </div>
+            `;
+
+            // Загрузка комментариев
+            const commentsContainer = document.getElementById('commentsContainer');
+            commentsContainer.innerHTML = '';
+            movie.comments.forEach(comment => {
+                const commentDiv = document.createElement('div');
+                commentDiv.className = 'comment';
+                commentDiv.innerHTML = `<p><strong>${comment.nickname}:</strong> ${comment.content}</p>`;
+                commentsContainer.appendChild(commentDiv);
+            });
+        }
+
+        // Функция для добавления комментария
+        async function handleComment(event) {
+            event.preventDefault();
+            const urlParams = new URLSearchParams(window.location.search);
+            const movieId = urlParams.get('movie_id');
+
+            const nickname = document.getElementById('commentNickname').value;
+            const content = document.getElementById('commentContent').value;
+
+            const token = localStorage.getItem('jwt-token');
+            if (!token) {
+                alert('Пожалуйста, войдите для добавления комментария.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:8081/movies/${movieId}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content })
+                });
+
+                if (!response.ok) throw new Error('Failed to add comment');
+
+                // Обновление комментариев
+                loadMovieDetail();
+                document.querySelector('.comment-form').reset();
+            } catch (error) {
+                console.error(error);
+                alert('Не удалось добавить комментарий.');
+            }
+        }
+
+        // Загрузка деталей фильма при загрузке страницы
+        document.addEventListener('DOMContentLoaded', loadMovieDetail);
+
+    </script>       
+</body>
+</html>

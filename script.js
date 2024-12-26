@@ -68,7 +68,7 @@ function displayMovies(moviesToShow = []) {
         movieCard.addEventListener('click', () => {
             // Перенаправление на страницу с деталями фильма
             // Например, переход на страницу по URL "/movie/[id]" или "/movie/[title]"
-            window.location.href = `/movie/${movie.title.replace(/\s+/g, '-').toLowerCase()}`; // Пример URL с названием фильма
+            window.location.href = `/player/movie.html?movie_id=${movie.id}`; // Пример URL с названием фильма
         });
         container.appendChild(movieCard);
     });
@@ -116,11 +116,6 @@ function displayMovies(moviesToShow = []) {
 //     });
 // }
 
-// Show movie modal
-function showAddMovieModal() {
-    document.getElementById('addMovieModal').style.display = 'flex';
-}
-
 // Search movies
 function searchMovies() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
@@ -134,7 +129,7 @@ function searchMovies() {
 function showEditMovieModal(index) {
     const movie = movies[index];
     const modal = document.getElementById('editMovieModal');
-    modal.style.display = 'flex';
+    showModal('editMovieModal')
 
     modal.querySelector('[name="title"]').value = movie.title;
     modal.querySelector('[name="description"]').value = movie.description;
@@ -146,7 +141,7 @@ function showEditMovieModal(index) {
     modal.querySelector('form').onsubmit = (event) => {
         event.preventDefault();
         updateMovie(index, new FormData(event.target));
-        modal.style.display = 'none';
+        hideModal('editMovieModal')
     };
 }
 
@@ -185,11 +180,6 @@ function deleteMovie(index) {
     }
 }
 
-// Show movie modal
-function showAddMovieModal() {
-    document.getElementById('addMovieModal').style.display = 'flex';
-}
-
 // Search movies
 function searchMovies() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
@@ -197,26 +187,6 @@ function searchMovies() {
         movie.title.toLowerCase().includes(searchTerm)
     );
     displayMovies(filteredMovies);
-}
-
-// Show movie edit modal
-function showEditMovieModal(index) {
-    const movie = movies[index];
-    const modal = document.getElementById('editMovieModal');
-    modal.style.display = 'flex';
-
-    modal.querySelector('[name="title"]').value = movie.title;
-    modal.querySelector('[name="description"]').value = movie.description;
-    modal.querySelector('[name="year"]').value = movie.year;
-    modal.querySelector('[name="rating"]').value = movie.rating;
-    modal.querySelector('[name="poster"]').value = movie.poster;
-    modal.querySelector('[name="video"]').value = movie.video;
-
-    modal.querySelector('form').onsubmit = (event) => {
-        event.preventDefault();
-        updateMovie(index, new FormData(event.target));
-        modal.style.display = 'none';
-    };
 }
 
 // Add new movie
@@ -285,14 +255,6 @@ function deleteMovie(index) {
         displayMovies();
     }
 }
-
-document.getElementById('addMovieModal').querySelector('.close-btn').onclick = () => {
-    document.getElementById('addMovieModal').style.display = 'none';
-};
-
-document.getElementById('editMovieModal').querySelector('.close-btn').onclick = () => {
-    document.getElementById('editMovieModal').style.display = 'none';
-};
 
 // Initialize authentication state
 function initializeAuth() {
@@ -303,14 +265,6 @@ function initializeAuth() {
     } else {
         updateAuthUI();
     }
-}
-
-function showModal(modalId) {
-    document.getElementById(modalId).style.display = 'flex';
-}
-
-function hideModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
 }
 
 function handleLogin(event) {
@@ -334,8 +288,8 @@ displayMovies();
 
 // Close modals when clicking outside
 window.onclick = function(event) {
-    if (event.target.className === 'modal') {
-        event.target.style.display = 'none';
+    if (event.target.className.includes('modal')) {
+        hideModal(event.target.id)
     }
 }
 // Helper function to parse JWT
@@ -369,7 +323,7 @@ function updateAuthUI(user = null) {
                 : '<button class="subscribe-btn" onclick="showModal(\'subscriptionModal\')">Купить подписку</button>'
             }
             ${user.is_admin 
-                ? '<button class="admin-panel-btn" onclick="openAdminPanel()">Панель Администратора</button>' 
+                ? '<button class="admin-panel-btn" onclick="showAdminPanel()">Панель Администратора</button>' 
                 : ''
             }
             <button class="logout-btn" onclick="handleLogout()">Выйти</button>
@@ -520,34 +474,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // Открытие панели администратора
-function openAdminPanel() {
+function showAdminPanel() {
     const adminPanelModal = document.getElementById('adminPanelModal');
-    adminPanelModal.style.display = 'flex';  // Показываем модальное окно
+    showModal('adminPanelModal')  // Показываем модальное окно
 }
 
 // Закрытие модального окна
 function hideModal(modalId) {
     const modal = document.getElementById(modalId);
-    modal.style.display = 'none';  // Скрываем модальное окно
+    modal.classList.remove('opened')  // Скрываем модальное окно
+}
+
+function showModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.add('opened') // Открываем модальное окно добавления фильма
 }
 
 // Функции для отображения соответствующих модальных окон
 function showAddMovieModal() {
     hideModal('adminPanelModal'); // Закрываем панель администратора
-    const addMovieModal = document.getElementById('addMovieModal');
-    addMovieModal.style.display = 'flex'; // Открываем модальное окно добавления фильма
+    showModal('addMovieModal')
 }
 
 function showEditMovieModal() {
     hideModal('adminPanelModal'); // Закрываем панель администратора
-    const editMovieModal = document.getElementById('editMovieModal');
-    editMovieModal.style.display = 'flex'; // Открываем модальное окно редактирования фильма
+    showModal('editMovieModal')
 }
 
 function showDeleteMovieModal() {
     hideModal('adminPanelModal'); // Закрываем панель администратора
-    const deleteMovieModal = document.getElementById('deleteMovieModal');
-    deleteMovieModal.style.display = 'flex'; // Открываем модальное окно удаления фильма
+    showModal('deleteMovieModal')
 }
 
 // Пример обработки добавления фильма (можно адаптировать для вашего API или базы данных)
@@ -569,7 +525,6 @@ function deleteMovie(movieId) {
 }
 
 // Добавляем обработчик события для кнопки
-document.querySelector('.modal-content-admin').addEventListener('click', openAdminPanel);
 
 
 // Handle logout
