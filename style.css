@@ -170,7 +170,7 @@ input, textarea {
 }
 
 /* Стиль для поля поиска */
-.search-container {
+/* .search-container {
     margin: 2rem auto;
     width: 90%;
     max-width: 600px;
@@ -185,7 +185,25 @@ input, textarea {
     border: 1px solid #444;
     background: #1a1a1a;
     color: white;
+} */
+
+.search-container {
+    max-width: 600px;
+    display: flex; /* Располагаем элементы в одну строку */
+    align-items: center; /* Центрирование элементов по вертикали */
+    gap: 10px; /* Расстояние между поиском и кнопкой */
+    margin: 0 auto; /* Центровка по горизонтали */
+    margin-bottom: 20px;
 }
+
+#searchInput {
+    flex: 1; /* Поле поиска занимает всё доступное пространство */
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
 
 /* Стиль кнопок в админ панели */
 .admin-panel-btn {
@@ -260,3 +278,18 @@ input, textarea {
 .subscribe-btn:hover {
     background: linear-gradient(135deg, #29b92e, #069169);
 }
+
+#recommendButton {
+    background: linear-gradient(135deg, #e726cd, #b919a9);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+#recommendButton:hover {
+    background: linear-gradient(135deg, #ec75e4, #820bae);
+}
+

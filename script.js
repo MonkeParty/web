@@ -1,16 +1,41 @@
 // Sample movie data
-// Sample movie data
-const movies = [
-    { title: "Inception", description: "A mind-bending thriller.", year: 2010, rating: 8.8, poster: "", video: "" },
-    { title: "The Dark Knight", description: "The battle for Gotham.", year: 2008, rating: 9.0, poster: "", video: "" },
-    { title: "Pulp Fiction", description: "Stories intertwine.", year: 1994, rating: 8.9, poster: "", video: "" },
-];
 
 let user = null;  // To store user information
 
-// Display movies
-function displayMovies(moviesToShow = movies) {
-    console.log("Displaying movies:", moviesToShow); // Debugging output
+async function fetchMovies(userId) {
+    try {
+        const response = await fetch(`http://localhost:8081/recommend/${userId}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch movies');
+        }
+
+        const moviesData = await response.json();
+        displayMovies(moviesData);
+    } catch (error) {
+        console.error('Error fetching movies:', error);
+        alert('Не удалось загрузить фильмы. Попробуйте позже.');
+    }
+}
+
+function fetchNewRecommendations() {
+    const userId = parseJwt(localStorage.getItem('jwt-token')).id;
+    
+    fetch(`http://localhost:8081/recommend/${userId}`)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error("Failed to fetch recommendations");
+            }
+            return response.json();
+        })
+        .then((movies) => {
+            displayMovies(movies); // Функция для отображения фильмов
+        })
+        .catch((error) => {
+            console.error("Error fetching recommendations:", error);
+        });
+}
+
+function displayMovies(moviesToShow = []) {
     const container = document.getElementById('movieContainer');
     if (!container) {
         console.error("Container #movieContainer not found.");
@@ -48,6 +73,48 @@ function displayMovies(moviesToShow = movies) {
         container.appendChild(movieCard);
     });
 }
+
+
+// Display movies
+// function displayMovies(moviesToShow = movies) {
+//     console.log("Displaying movies:", moviesToShow); // Debugging output
+//     const container = document.getElementById('movieContainer');
+//     if (!container) {
+//         console.error("Container #movieContainer not found.");
+//         return;
+//     }
+//     container.innerHTML = '';
+    
+//     moviesToShow.forEach((movie, index) => {
+//         const movieCard = document.createElement('div');
+//         movieCard.className = 'movie-card';
+//         movieCard.innerHTML = `
+//             <div class="movie-poster">
+//                 <img src="${movie.poster || 'image/placeholder.jpg'}" alt="${movie.title}" />
+//             </div>
+//             <div class="movie-info">
+//                 <h3 class="movie-title">${movie.title}</h3>
+//                 <p>${movie.description}</p>
+//                 <p>Year: ${movie.year}</p>
+//                 <p>Rating: ${movie.rating}</p>
+//             </div>
+//         `;
+//         if (user && user.is_admin) {
+//             movieCard.innerHTML += `
+//                 <div class="admin-controls">
+//                     <button class="edit-btn" onclick="showEditMovieModal(${index})">Edit</button>
+//                     <button class="delete-btn" onclick="deleteMovie(${index})">Delete</button>
+//                 </div>
+//             `;
+//         }
+//         movieCard.addEventListener('click', () => {
+//             // Перенаправление на страницу с деталями фильма
+//             // Например, переход на страницу по URL "/movie/[id]" или "/movie/[title]"
+//             window.location.href = `/movie/${movie.title.replace(/\s+/g, '-').toLowerCase()}`; // Пример URL с названием фильма
+//         });
+//         container.appendChild(movieCard);
+//     });
+// }
 
 // Show movie modal
 function showAddMovieModal() {
@@ -443,8 +510,14 @@ function handleLogout() {
     updateAuthUI();
 }
 
-// Initialize authentication state on page load
-document.addEventListener('DOMContentLoaded', initializeAuth);
+// Initialize authentication state and fetch movies on page load
+document.addEventListener('DOMContentLoaded', () => {
+    initializeAuth();
+    var id = parseJwt(localStorage.getItem('jwt-token')).id
+    const userId = id ? id : 'guest'; // Если пользователь не авторизован, используем "guest"
+    fetchMovies(userId);
+});
+
 
 // Открытие панели администратора
 function openAdminPanel() {

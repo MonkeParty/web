@@ -5,7 +5,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>Movie Portal</h1>
+        <h1 style="background: linear-gradient(135deg, #a426e7, #8c19b9); color:#b751a3;  -webkit-text-stroke: 1px #FFFFFF;">Movie Portal</h1>
         <div class="auth-buttons">
             <button class="login-btn" onclick="showModal('loginModal')">Войти</button>
             <button class="register-btn" onclick="showModal('registerModal')">Регистрация</button>
@@ -14,7 +14,10 @@
 
     <div class="search-container">
         <input type="text" id="searchInput" placeholder="Search for movies..." onkeyup="searchMovies()">
-    </div>
+        <button id="recommendButton" onclick="fetchNewRecommendations()">Получить новые рекомендации</button>
+    </div>    
+    
+    <h2 style="text-align: center; color: #385a8c;">Фильмы для вас</h2>
 
     <div class="movie-container" id="movieContainer">
         <!-- Movies will be loaded here -->
