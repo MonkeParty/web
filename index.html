@@ -7,8 +7,8 @@
     <div class="header">
         <h1>Movie Portal</h1>
         <div class="auth-buttons">
-            <button class="login-btn" onclick="showModal('loginModal')">Login</button>
-            <button class="register-btn" onclick="showModal('registerModal')">Register</button>
+            <button class="login-btn" onclick="showModal('loginModal')">Войти</button>
+            <button class="register-btn" onclick="showModal('registerModal')">Регистрация</button>
         </div>
     </div>
 
@@ -24,17 +24,17 @@
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="hideModal('loginModal')">&times;</span>
-            <h2>Login</h2>
+            <h2>Войти</h2>
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
-                    <label>Email:</label>
+                    <label>Почта:</label>
                     <input type="email" name="email" required>
                 </div>
                 <div class="form-group">
-                    <label>Password:</label>
+                    <label>Пароль:</label>
                     <input type="password" name="password" required>
                 </div>
-                <button type="submit" class="login-btn">Login</button>
+                <button type="submit" class="login-btn">Войти</button>
             </form>
         </div>
     </div>
@@ -43,30 +43,30 @@
     <div id="registerModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="hideModal('registerModal')">&times;</span>
-            <h2>Register</h2>
+            <h2>Регистрация</h2>
             <form id="registerForm" onsubmit="handleRegister(event)">
                 <div class="form-group">
-                    <label>Name:</label>
+                    <label>Имя:</label>
                     <input type="text" name="name" required>
                 </div>
                 <div class="form-group">
-                    <label>Lastname:</label>
+                    <label>Фамилия:</label>
                     <input type="text" name="lastname" required>
                 </div>
                 <div class="form-group">
-                    <label>Fathername:</label>
+                    <label>Отчество:</label>
                     <input type="text" name="fathername" required>
                 </div>
                 <div class="form-group">
-                    <label>Email:</label>
+                    <label>Почта:</label>
                     <input type="email" name="email" required>
                 </div>
                 <div class="form-group">
-                    <label>Password:</label>
+                    <label>Пароль:</label>
                     <input type="password" name="password" required>
                 </div>
                 <div class="form-group">
-                    <label>Birthday:</label>
+                    <label>Дата рождения:</label>
                     <input type="date" name="birthday" required>
                 </div>
                 <button type="submit" class="register-btn">Register</button>
@@ -78,11 +78,103 @@
     <div id="subscriptionModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="hideModal('subscriptionModal')">&times;</span>
-            <h2>Subscribe</h2>
-            <p>Do you want to purchase a subscription?</p>
-            <button class="subscribe-btn" onclick="handleSubscription()">Subscribe</button>
+            <h2>Подписаться</h2>
+            <p>Вы точно хотите оформить подписку?</p>
+            <button class="subscribe-btn" onclick="handleSubscription()">Подписаться!</button>
         </div>
     </div>
+
+    <!-- Добавить фильм -->
+    <div class="modal" id="addMovieModal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <form onsubmit="event.preventDefault(); addMovie(new FormData(this)); hideModal('addMovieModal');">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Year</label>
+                    <input type="number" name="year" required>
+                </div>
+                <div class="form-group">
+                    <label>Rating</label>
+                    <input type="number" step="0.1" name="rating" required>
+                </div>
+                <div class="form-group">
+                    <label>Poster URL</label>
+                    <input type="url" name="poster">
+                </div>
+                <div class="form-group">
+                    <label>Video URL</label>
+                    <input type="url" name="video">
+                </div>
+                <button type="submit">Add Movie</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Изменение фильма -->
+    <div class="modal" id="editMovieModal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <form>
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Year</label>
+                    <input type="number" name="year" required>
+                </div>
+                <div class="form-group">
+                    <label>Rating</label>
+                    <input type="number" step="0.1" name="rating" required>
+                </div>
+                <div class="form-group">
+                    <label>Poster URL</label>
+                    <input type="url" name="poster">
+                </div>
+                <div class="form-group">
+                    <label>Video URL</label>
+                    <input type="url" name="video">
+                </div>
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+    </div>    
+
+
+
+    <!-- Панель администратора -->
+    <div id="adminPanelModal" class="modal">
+        <div class="modal-content-admin">
+            <span class="close-btn" onclick="hideModal('adminPanelModal')">&times;</span>
+            <h2>Панель администратора</h2>
+            
+            <!-- Кнопки для управления фильмами -->
+            <div class="admin-buttons">
+                <button class="admin-btn" onclick="showAddMovieModal()">Добавить фильм</button>
+                <button class="admin-btn" onclick="showEditMovieModal()">Изменить фильм</button>
+                <button class="admin-btn" onclick="showDeleteMovieModal()">Удалить фильм</button>
+            </div>
+
+            <!-- Контейнер для отображения фильмов (если нужно) -->
+            <div id="movieListContainer">
+                <!-- Здесь будут отображаться фильмы для редактирования или удаления -->
+            </div>
+        </div>
+    </div>
+
+
 
 <script src="script.js"></script>
 

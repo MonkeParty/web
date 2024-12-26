@@ -1,44 +1,241 @@
 // Sample movie data
+// Sample movie data
 const movies = [
-    { title: "Inception", year: 2010, rating: 8.8 },
-    { title: "The Dark Knight", year: 2008, rating: 9.0 },
-    { title: "Pulp Fiction", year: 1994, rating: 8.9 },
-    { title: "The Godfather", year: 1972, rating: 9.2 },
-    { title: "Fight Club", year: 1999, rating: 8.8 }
+    { title: "Inception", description: "A mind-bending thriller.", year: 2010, rating: 8.8, poster: "", video: "" },
+    { title: "The Dark Knight", description: "The battle for Gotham.", year: 2008, rating: 9.0, poster: "", video: "" },
+    { title: "Pulp Fiction", description: "Stories intertwine.", year: 1994, rating: 8.9, poster: "", video: "" },
 ];
 
+let user = null;  // To store user information
+
+// Display movies
 function displayMovies(moviesToShow = movies) {
+    console.log("Displaying movies:", moviesToShow); // Debugging output
     const container = document.getElementById('movieContainer');
+    if (!container) {
+        console.error("Container #movieContainer not found.");
+        return;
+    }
     container.innerHTML = '';
     
-    moviesToShow.forEach(movie => {
+    moviesToShow.forEach((movie, index) => {
         const movieCard = document.createElement('div');
         movieCard.className = 'movie-card';
         movieCard.innerHTML = `
             <div class="movie-poster">
-                <svg width="100" height="100" viewBox="0 0 100 100">
-                    <rect width="100" height="100" fill="#3c3c3c"/>
-                    <text x="50" y="50" font-size="12" fill="white" text-anchor="middle" dominant-baseline="middle">
-                        ${movie.title}
-                    </text>
-                </svg>
+                <img src="${movie.poster || 'image/placeholder.jpg'}" alt="${movie.title}" />
             </div>
             <div class="movie-info">
                 <h3 class="movie-title">${movie.title}</h3>
+                <p>${movie.description}</p>
                 <p>Year: ${movie.year}</p>
                 <p>Rating: ${movie.rating}</p>
             </div>
         `;
+        if (user && user.is_admin) {
+            movieCard.innerHTML += `
+                <div class="admin-controls">
+                    <button class="edit-btn" onclick="showEditMovieModal(${index})">Edit</button>
+                    <button class="delete-btn" onclick="deleteMovie(${index})">Delete</button>
+                </div>
+            `;
+        }
+        movieCard.addEventListener('click', () => {
+            // Перенаправление на страницу с деталями фильма
+            // Например, переход на страницу по URL "/movie/[id]" или "/movie/[title]"
+            window.location.href = `/movie/${movie.title.replace(/\s+/g, '-').toLowerCase()}`; // Пример URL с названием фильма
+        });
         container.appendChild(movieCard);
     });
 }
 
+// Show movie modal
+function showAddMovieModal() {
+    document.getElementById('addMovieModal').style.display = 'flex';
+}
+
+// Search movies
 function searchMovies() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const filteredMovies = movies.filter(movie => 
         movie.title.toLowerCase().includes(searchTerm)
     );
     displayMovies(filteredMovies);
+}
+
+// Show movie edit modal
+function showEditMovieModal(index) {
+    const movie = movies[index];
+    const modal = document.getElementById('editMovieModal');
+    modal.style.display = 'flex';
+
+    modal.querySelector('[name="title"]').value = movie.title;
+    modal.querySelector('[name="description"]').value = movie.description;
+    modal.querySelector('[name="year"]').value = movie.year;
+    modal.querySelector('[name="rating"]').value = movie.rating;
+    modal.querySelector('[name="poster"]').value = movie.poster;
+    modal.querySelector('[name="video"]').value = movie.video;
+
+    modal.querySelector('form').onsubmit = (event) => {
+        event.preventDefault();
+        updateMovie(index, new FormData(event.target));
+        modal.style.display = 'none';
+    };
+}
+
+// Add new movie
+function addMovie(formData) {
+    const newMovie = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        year: parseInt(formData.get('year')),
+        rating: parseFloat(formData.get('rating')),
+        poster: formData.get('poster'),
+        video: formData.get('video')
+    };
+    movies.push(newMovie);
+    displayMovies();
+}
+
+// Update movie
+function updateMovie(index, formData) {
+    movies[index] = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        year: parseInt(formData.get('year')),
+        rating: parseFloat(formData.get('rating')),
+        poster: formData.get('poster'),
+        video: formData.get('video')
+    };
+    displayMovies();
+}
+
+// Delete movie
+function deleteMovie(index) {
+    if (confirm('Are you sure you want to delete this movie?')) {
+        movies.splice(index, 1);
+        displayMovies();
+    }
+}
+
+// Show movie modal
+function showAddMovieModal() {
+    document.getElementById('addMovieModal').style.display = 'flex';
+}
+
+// Search movies
+function searchMovies() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const filteredMovies = movies.filter(movie => 
+        movie.title.toLowerCase().includes(searchTerm)
+    );
+    displayMovies(filteredMovies);
+}
+
+// Show movie edit modal
+function showEditMovieModal(index) {
+    const movie = movies[index];
+    const modal = document.getElementById('editMovieModal');
+    modal.style.display = 'flex';
+
+    modal.querySelector('[name="title"]').value = movie.title;
+    modal.querySelector('[name="description"]').value = movie.description;
+    modal.querySelector('[name="year"]').value = movie.year;
+    modal.querySelector('[name="rating"]').value = movie.rating;
+    modal.querySelector('[name="poster"]').value = movie.poster;
+    modal.querySelector('[name="video"]').value = movie.video;
+
+    modal.querySelector('form').onsubmit = (event) => {
+        event.preventDefault();
+        updateMovie(index, new FormData(event.target));
+        modal.style.display = 'none';
+    };
+}
+
+// Add new movie
+function addMovie(formData) {
+    const newMovie = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        year: parseInt(formData.get('year')),
+        rating: parseFloat(formData.get('rating')),
+        poster: formData.get('poster'),
+        video: formData.get('video')
+    };
+    movies.push(newMovie);
+    displayMovies();
+}
+
+// Update movie
+function updateMovie(index, formData) {
+    movies[index] = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        year: parseInt(formData.get('year')),
+        rating: parseFloat(formData.get('rating')),
+        poster: formData.get('poster'),
+        video: formData.get('video')
+    };
+    displayMovies();
+}
+
+// Delete movie
+function deleteMovie(index) {
+    if (confirm('Are you sure you want to delete this movie?')) {
+        movies.splice(index, 1);
+        displayMovies();
+    }
+}
+
+function addMovie(formData) {
+    const newMovie = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        year: parseInt(formData.get('year')),
+        rating: parseFloat(formData.get('rating')),
+        poster: formData.get('poster'),
+        video: formData.get('video')
+    };
+    movies.push(newMovie);
+    displayMovies();
+}
+
+function updateMovie(index, formData) {
+    movies[index] = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        year: parseInt(formData.get('year')),
+        rating: parseFloat(formData.get('rating')),
+        poster: formData.get('poster'),
+        video: formData.get('video')
+    };
+    displayMovies();
+}
+
+function deleteMovie(index) {
+    if (confirm('Are you sure you want to delete this movie?')) {
+        movies.splice(index, 1);
+        displayMovies();
+    }
+}
+
+document.getElementById('addMovieModal').querySelector('.close-btn').onclick = () => {
+    document.getElementById('addMovieModal').style.display = 'none';
+};
+
+document.getElementById('editMovieModal').querySelector('.close-btn').onclick = () => {
+    document.getElementById('editMovieModal').style.display = 'none';
+};
+
+// Initialize authentication state
+function initializeAuth() {
+    const token = localStorage.getItem('jwt-token');
+    if (token) {
+        user = parseJwt(token);
+        updateAuthUI(user);
+    } else {
+        updateAuthUI();
+    }
 }
 
 function showModal(modalId) {
@@ -100,8 +297,14 @@ function updateAuthUI(user = null) {
     if (user) {
         authButtons.innerHTML = `
             <span>Добро пожаловать, ${user.name}!</span>
-            ${user.has_sub ? '<span>У вас есть подписка</span>' : '<button class="subscribe-btn" onclick="showModal(\'subscriptionModal\')">Купить подписку</button>'}
-            ${user.is_admin ? '<button class="admin-panel-btn" onclick="openAdminPanel()">Панель Администратора</button>' : ''}
+            ${user.has_sub 
+                ? '<button class="unsubscribe-btn" onclick="handleUnsubscription()">Отменить подписку</button>' 
+                : '<button class="subscribe-btn" onclick="showModal(\'subscriptionModal\')">Купить подписку</button>'
+            }
+            ${user.is_admin 
+                ? '<button class="admin-panel-btn" onclick="openAdminPanel()">Панель Администратора</button>' 
+                : ''
+            }
             <button class="logout-btn" onclick="handleLogout()">Выйти</button>
         `;
     } else {
@@ -109,6 +312,37 @@ function updateAuthUI(user = null) {
             <button class="login-btn" onclick="showModal('loginModal')">Войти</button>
             <button class="register-btn" onclick="showModal('registerModal')">Регистрация</button>
         `;
+    }
+}
+
+// Handle unsubscription
+async function handleUnsubscription() {
+    const token = localStorage.getItem('jwt-token');
+    if (!token) {
+        alert('You need to be logged in to unsubscribe.');
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:8081/unsub', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) throw new Error('Unsubscription failed');
+
+        const data = await response.json();
+        localStorage.setItem('jwt-token', data.token);
+        
+        const user = parseJwt(localStorage.getItem('jwt-token'));
+        updateAuthUI(user);
+        alert('Subscription cancelled successfully!');
+    } catch (error) {
+        console.error(error);
+        alert('Failed to unsubscribe. Please try again.');
     }
 }
 
@@ -183,13 +417,17 @@ async function handleSubscription() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ${token}'
+                'Authorization': `Bearer ${token}`
             }
         });
 
         if (!response.ok) throw new Error('Subscription failed');
 
         const data = await response.json();
+        localStorage.setItem('jwt-token', data.token);
+        
+        const user = parseJwt(localStorage.getItem('jwt-token'));
+        updateAuthUI(user);
         alert('Subscription purchased successfully!');
         hideModal('subscriptionModal');
     } catch (error) {
@@ -208,11 +446,58 @@ function handleLogout() {
 // Initialize authentication state on page load
 document.addEventListener('DOMContentLoaded', initializeAuth);
 
-// Open Admin Panel
+// Открытие панели администратора
 function openAdminPanel() {
-    alert('Переход в панель администратора...');
-    // Здесь можно реализовать редирект или открыть модальное окно
+    const adminPanelModal = document.getElementById('adminPanelModal');
+    adminPanelModal.style.display = 'flex';  // Показываем модальное окно
 }
+
+// Закрытие модального окна
+function hideModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.style.display = 'none';  // Скрываем модальное окно
+}
+
+// Функции для отображения соответствующих модальных окон
+function showAddMovieModal() {
+    hideModal('adminPanelModal'); // Закрываем панель администратора
+    const addMovieModal = document.getElementById('addMovieModal');
+    addMovieModal.style.display = 'flex'; // Открываем модальное окно добавления фильма
+}
+
+function showEditMovieModal() {
+    hideModal('adminPanelModal'); // Закрываем панель администратора
+    const editMovieModal = document.getElementById('editMovieModal');
+    editMovieModal.style.display = 'flex'; // Открываем модальное окно редактирования фильма
+}
+
+function showDeleteMovieModal() {
+    hideModal('adminPanelModal'); // Закрываем панель администратора
+    const deleteMovieModal = document.getElementById('deleteMovieModal');
+    deleteMovieModal.style.display = 'flex'; // Открываем модальное окно удаления фильма
+}
+
+// Пример обработки добавления фильма (можно адаптировать для вашего API или базы данных)
+function addMovie(formData) {
+    // Реализовать добавление фильма (например, отправить данные на сервер)
+    alert('Фильм добавлен!');
+}
+
+// Пример обработки редактирования фильма
+function editMovie(formData) {
+    // Реализовать редактирование фильма (например, отправить данные на сервер)
+    alert('Фильм обновлен!');
+}
+
+// Пример обработки удаления фильма
+function deleteMovie(movieId) {
+    // Реализовать удаление фильма (например, отправить запрос на сервер)
+    alert('Фильм удален!');
+}
+
+// Добавляем обработчик события для кнопки
+document.querySelector('.modal-content-admin').addEventListener('click', openAdminPanel);
+
 
 // Handle logout
 function handleLogout() {
@@ -221,4 +506,8 @@ function handleLogout() {
 }
 
 // Initialize authentication state on page load
-document.addEventListener('DOMContentLoaded', initializeAuth);
+// Initialize UI
+document.addEventListener('DOMContentLoaded', () => {
+    initializeAuth();
+    displayMovies();
+});
