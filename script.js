@@ -1,10 +1,16 @@
-// Sample movie data
+// Все пути на главной страницы
+const RECOMMEND_URL = 'http://localhost:8081/recommend/'
+const UNSUB_URL = 'http://localhost:8081/unsub'
+const LOGIN_URL = 'http://localhost:8081/login'
+const REGISTER_URL = 'http://localhost:8081/register'
+const SUB_URL = 'http://localhost:8081/sub'
+
 
 let user = null;  // To store user information
 
 async function fetchMovies(userId) {
     try {
-        const response = await fetch(`http://localhost:8081/recommend/${userId}`);
+        const response = await fetch(RECOMMEND_URL+`${userId}`);
         if (!response.ok) {
             throw new Error('Failed to fetch movies');
         }
@@ -20,7 +26,7 @@ async function fetchMovies(userId) {
 function fetchNewRecommendations() {
     const userId = parseJwt(localStorage.getItem('jwt-token')).id;
     
-    fetch(`http://localhost:8081/recommend/${userId}`)
+    fetch(RECOMMEND_URL+`${userId}`)
         .then((response) => {
             if (!response.ok) {
                 throw new Error("Failed to fetch recommendations");
@@ -345,7 +351,7 @@ async function handleUnsubscription() {
     }
 
     try {
-        const response = await fetch('http://localhost:8081/unsub', {
+        const response = await fetch(UNSUB_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -375,7 +381,7 @@ async function handleLogin(event) {
     const password = formData.get('password');
 
     try {
-        const response = await fetch('http://localhost:8081/login', {
+        const response = await fetch(LOGIN_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -406,7 +412,7 @@ async function handleRegister(event) {
     const birthday = formData.get('birthday');
 
     try {
-        const response = await fetch('http://localhost:8081/register', {
+        const response = await fetch(REGISTER_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, lastname, fathername, email, password, birthday })
@@ -434,7 +440,7 @@ async function handleSubscription() {
     }
 
     try {
-        const response = await fetch('http://localhost:8081/sub', {
+        const response = await fetch(SUB_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
